@@ -1,0 +1,54 @@
+// Package handler provides HTTP request handlers.
+// This file defines the dependency injection container shared across all handlers.
+package handler
+
+import (
+	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+
+	"{{ .Module }}/internal/config"
+	"{{ .Module }}/internal/pkg/jwttoken"
+	"{{ .Module }}/internal/pkg/sensitive"
+	"{{ .Module }}/internal/queue"
+	"{{ .Module }}/internal/search"
+	"{{ .Module }}/internal/service"
+	"{{ .Module }}/internal/storage"
+	"{{ .Module }}/internal/ws"
+)
+
+// Dependencies are shared across HTTP handlers.
+type Dependencies struct {
+	Cfg   *config.C
+	DB    *gorm.DB
+	Redis *redis.Client
+	Log   *zap.Logger
+
+	// WebSocket hubs
+	Hub     *ws.Hub     // danmaku
+	ChatHub *ws.ChatHub // DM / live chat
+
+	// Auth
+	JWT *jwttoken.Manager
+
+	// Content safety
+	Sens *sensitive.Filter
+
+	// Storage
+	OSS storage.FileStorager
+
+	// Async
+	MQ queue.TranscodePublisher
+
+	// Search
+	ES *search.Client
+
+	// Services
+	Play     *service.PlayCounter
+	Svcs     *service.Services
+}
+
+// API exposes HTTP handlers.
+type API struct {
+	*Dependencies
+}
